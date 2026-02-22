@@ -124,7 +124,13 @@ def setup_commands(bot: commands.Bot):
             result = await loop.run_in_executor(
                 None,
                 lambda: subprocess.run(
-                    ["claude", "-p", "--output-format", "text", "--dangerously-skip-permissions", prompt],
+                    [
+                        "claude", "-p", "--output-format", "text",
+                        "--permission-mode", "acceptEdits",
+                        "--allowedTools", "Read Edit Write Glob Grep",
+                        "--max-budget-usd", "1.00",
+                        prompt,
+                    ],
                     capture_output=True,
                     text=True,
                     timeout=300,

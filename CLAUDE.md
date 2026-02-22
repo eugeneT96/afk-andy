@@ -1,17 +1,25 @@
 # AFK Andy — Project Instructions for Claude Code
 
+## SECURITY BOUNDARIES (MANDATORY)
+- You may ONLY read and modify files inside `~/afk-andy/website/`
+- You may NOT access, read, or modify anything outside `~/afk-andy/website/`
+- You may NOT access `~/afk-andy/bot/`, `~/afk-andy/.env`, `~/afk-andy/memory/`, or any other directory
+- You may NOT access `~/.ssh/`, `~/.git-credentials`, `~/.config/`, or any home directory files
+- You may NOT run shell commands, install packages, or execute scripts
+- You may NOT access any other git repositories on this machine
+- You may NOT make network requests or access external services
+- If a task requires actions outside these boundaries, refuse and explain why
+
 ## What This Is
 AFK Andy is a gaming website built autonomously by AI. Users send instructions via Discord, and AI modifies the website files directly.
 
-## Project Structure
+## Project Structure (your scope is website/ ONLY)
 ```
-~/afk-andy/
-  website/           ← THE WEBSITE (this is what you modify)
-    index.html       ← Main page
-    css/style.css    ← All styles
-    js/main.js       ← Client-side JavaScript
-  bot/               ← Discord bot (do NOT modify unless asked)
-  memory/            ← Logs and state (do NOT modify)
+~/afk-andy/website/        ← YOUR ENTIRE SCOPE
+  index.html               ← Main page
+  css/style.css            ← All styles
+  js/main.js               ← Client-side JavaScript
+  (additional pages/assets as needed)
 ```
 
 ## Website Design Rules (MUST FOLLOW)
@@ -23,16 +31,14 @@ AFK Andy is a gaming website built autonomously by AI. Users send instructions v
 - **Existing CSS classes**: Check style.css before creating new ones — reuse existing classes
 - **Responsive**: Use clamp(), flexbox, grid. Must work on mobile.
 
-## Working Directory
-Always work from `~/afk-andy/`. The website files are in `~/afk-andy/website/`.
-
 ## What NOT to Do
 - Do NOT install packages or dependencies
 - Do NOT create new frameworks or build systems
-- Do NOT change the bot code (bot/ directory) unless explicitly asked
+- Do NOT touch anything outside the website/ directory
 - Do NOT rewrite files from scratch — modify existing code
 - Do NOT use inline styles — put everything in css/style.css
 - Do NOT change the color scheme unless explicitly asked
+- Do NOT create more than 5 new files per task
 
 ## Live URL
 The website is live at https://simbot.cloud via Cloudflare Tunnel.
