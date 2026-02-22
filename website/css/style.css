@@ -235,6 +235,90 @@ footer {
     margin-top: 0.5rem;
 }
 
+/* Game Page Styles */
+.game-header {
+    background: var(--bg-dark);
+    padding-top: 80px;
+}
+
+.game-container {
+    min-height: calc(100vh - 160px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+    text-align: center;
+}
+
+.game-container h1 {
+    font-size: 2.5rem;
+    font-weight: 900;
+    margin-bottom: 0.5rem;
+}
+
+.game-instructions {
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+}
+
+.game-wrapper {
+    position: relative;
+    border: 2px solid var(--accent);
+    border-radius: 8px;
+    box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+    overflow: hidden;
+}
+
+#flappy-canvas {
+    display: block;
+    background: linear-gradient(180deg, #1a1a2e 0%, #0a0a0f 100%);
+}
+
+.game-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(10, 10, 15, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 1;
+    transition: opacity 0.3s;
+}
+
+.game-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.overlay-content {
+    text-align: center;
+}
+
+.overlay-content h2 {
+    font-size: 2rem;
+    color: var(--accent);
+    margin-bottom: 1rem;
+}
+
+.overlay-content p {
+    color: var(--text);
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+}
+
+.game-stats {
+    display: flex;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.nav-links a.active {
+    color: var(--accent);
+}
+
 /* Responsive */
 @media (max-width: 600px) {
     .hero-content h1 {
