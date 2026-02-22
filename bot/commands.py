@@ -23,6 +23,20 @@ ACK_LINES = [
     "Copy. Let me cook.",
 ]
 
+# Progress updates while Claude works (sent at intervals)
+PROGRESS_LINES = [
+    "Reading through the code...",
+    "Hmm, I see what you're going for...",
+    "Making some changes...",
+    "Tweaking the styles...",
+    "Almost there, just cleaning things up...",
+    "Looking good so far...",
+    "Writing some fresh code...",
+    "Touching up a few things...",
+    "Putting the finishing touches on...",
+    "Just about wrapped up...",
+]
+
 DONE_LINES = [
     "Done! Check it out:",
     "All wrapped up. Here's what I did:",
@@ -51,6 +65,32 @@ NO_CHANGES_LINES = [
 ]
 
 
+async def send_progress(ctx, stop_event):
+    """Send progress messages while Claude is working."""
+    used = []
+    available = list(PROGRESS_LINES)
+    random.shuffle(available)
+
+    # Wait 15 seconds before first progress message
+    try:
+        await asyncio.wait_for(stop_event.wait(), timeout=15)
+        return  # Claude finished before first update
+    except asyncio.TimeoutError:
+        pass
+
+    while not stop_event.is_set() and available:
+        line = available.pop()
+        await ctx.send("*" + line + "*")
+
+        # Wait 20-35 seconds between messages
+        delay = random.randint(20, 35)
+        try:
+            await asyncio.wait_for(stop_event.wait(), timeout=delay)
+            return  # Claude finished
+        except asyncio.TimeoutError:
+            pass
+
+
 def setup_commands(bot: commands.Bot):
 
     @bot.command(name="build")
@@ -64,6 +104,10 @@ def setup_commands(bot: commands.Bot):
         await ctx.send("**" + description + "**\n" + ack)
 
         from utils import log_task, update_project_state, git_sync
+
+        # Start progress chatter in the background
+        stop_event = asyncio.Event()
+        progress_task = asyncio.create_task(send_progress(ctx, stop_event))
 
         try:
             website_dir = os.path.join(PROJECT_DIR, "website")
@@ -87,6 +131,10 @@ def setup_commands(bot: commands.Bot):
                     cwd=PROJECT_DIR,
                 )
             )
+
+            # Stop progress chatter
+            stop_event.set()
+            await progress_task
 
             if result.returncode != 0:
                 error_msg = result.stderr[:500] if result.stderr else "No details available"
@@ -137,9 +185,13 @@ def setup_commands(bot: commands.Bot):
             await ctx.send(embed=embed)
 
         except subprocess.TimeoutExpired:
+            stop_event.set()
+            await progress_task
             await ctx.send(random.choice(TIMEOUT_LINES))
             log_task(description, "failed", "Timeout")
         except Exception as e:
+            stop_event.set()
+            await progress_task
             fail = random.choice(FAIL_LINES)
             await ctx.send(fail + "\n`" + str(e) + "`")
             log_task(description, "failed", str(e))
