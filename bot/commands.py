@@ -162,7 +162,7 @@ def setup_commands(bot: commands.Bot):
             result = await loop.run_in_executor(
                 None,
                 lambda: subprocess.run(
-                    ["claude", "-p", "--output-format", "text", prompt],
+                    ["claude", "-p", "--output-format", "text", "--dangerously-skip-permissions", prompt],
                     capture_output=True,
                     text=True,
                     timeout=300,
