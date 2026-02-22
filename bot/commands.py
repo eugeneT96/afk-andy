@@ -4,6 +4,7 @@ import subprocess
 import discord
 from discord.ext import commands
 from datetime import datetime
+import asyncio
 import logging
 
 log = logging.getLogger("afk-andy")
@@ -43,7 +44,7 @@ def setup_commands(bot: commands.Bot):
         update_project_state(description, files_changed)
 
         # Auto-sync to GitHub
-        sync_result = git_sync(f"Build: {description[:50]}")
+        sync_result = git_sync("Build: " + description[:50])
 
         # Build response embed
         embed = discord.Embed(
@@ -55,7 +56,7 @@ def setup_commands(bot: commands.Bot):
         if files_changed:
             embed.add_field(
                 name="Files Changed",
-                value="\n".join(f"`{f}`" for f in files_changed[:10]),
+                value="\n".join("`" + f + "`" for f in files_changed[:10]),
                 inline=False,
             )
         if sync_result:
@@ -64,7 +65,7 @@ def setup_commands(bot: commands.Bot):
         # Truncate architect response for Discord
         if response_text:
             preview = response_text[:500] + ("..." if len(response_text) > 500 else "")
-            embed.add_field(name="Architect Notes", value=f"```\n{preview}\n```", inline=False)
+            embed.add_field(name="Architect Notes", value="```\n" + preview + "\n```", inline=False)
 
         await ctx.send(embed=embed)
 
@@ -85,7 +86,7 @@ def setup_commands(bot: commands.Bot):
             recent = features[-5:]
             embed.add_field(
                 name="Recent Features",
-                value="\n".join(f"- {f}" for f in recent),
+                value="\n".join("- " + f for f in recent),
                 inline=False,
             )
         embed.add_field(
@@ -111,8 +112,8 @@ def setup_commands(bot: commands.Bot):
         for t in recent:
             status_icon = "\u2705" if t["status"] == "completed" else "\u274C"
             embed.add_field(
-                name=f"{status_icon} {t['task'][:50]}",
-                value=f"Status: {t['status']} | {t['timestamp']}",
+                name=status_icon + " " + t["task"][:50],
+                value="Status: " + t["status"] + " | " + t["timestamp"],
                 inline=False,
             )
         await ctx.send(embed=embed)
@@ -129,11 +130,93 @@ def setup_commands(bot: commands.Bot):
             )
             output = result.stdout.strip() or "No commits yet."
         except Exception as e:
-            output = f"Error: {e}"
+            output = "Error: " + str(e)
 
         embed = discord.Embed(title="Recent Git Log", color=0x6E5494)
-        embed.description = f"```\n{output}\n```"
+        embed.description = "```\n" + output + "\n```"
         await ctx.send(embed=embed)
+
+    @bot.command(name="claude")
+    async def claude_cmd(ctx, *, description: str = None):
+        """Use Claude Code (flagship AI) for complex tasks."""
+        if not description:
+            await ctx.send("Usage: `!claude <description of what to build or change>`")
+            return
+
+        await ctx.send("**Claude is working on:** " + description + "\nThis may take a minute...")
+
+        from utils import log_task, update_project_state, git_sync
+
+        try:
+            website_dir = os.path.join(PROJECT_DIR, "website")
+            prompt = (
+                "You are modifying a gaming website at " + website_dir + ". "
+                "The site uses a dark theme (#0a0a0f background, #00ff41 neon green accents), "
+                "vanilla HTML/CSS/JS, with separate files: index.html, css/style.css, js/main.js. "
+                "TASK: " + description + ". "
+                "Make the changes directly to the files. Do not create new frameworks or dependencies. "
+                "Keep the existing dark gaming aesthetic."
+            )
+
+            loop = asyncio.get_event_loop()
+            result = await loop.run_in_executor(
+                None,
+                lambda: subprocess.run(
+                    ["claude", "-p", "--output-format", "text", prompt],
+                    capture_output=True,
+                    text=True,
+                    timeout=300,
+                    cwd=PROJECT_DIR,
+                )
+            )
+
+            if result.returncode != 0:
+                error_msg = result.stderr[:500] if result.stderr else "Unknown error"
+                await ctx.send("**Claude failed:** ```" + error_msg + "```")
+                log_task("[claude] " + description, "failed", error_msg)
+                return
+
+            response_text = result.stdout.strip()
+
+            # Check what files changed
+            diff_result = subprocess.run(
+                ["git", "diff", "--name-only"],
+                capture_output=True, text=True, cwd=PROJECT_DIR,
+            )
+            files_changed = [f for f in diff_result.stdout.strip().split("\n") if f]
+
+            log_task("[claude] " + description, "completed", files_changed)
+            if files_changed:
+                update_project_state("[claude] " + description, files_changed)
+
+            sync_result = git_sync("Claude: " + description[:50])
+
+            embed = discord.Embed(
+                title="Claude Build Complete",
+                description=description,
+                color=0x7C3AED,
+                timestamp=datetime.utcnow(),
+            )
+            if files_changed:
+                embed.add_field(
+                    name="Files Changed",
+                    value="\n".join("`" + f + "`" for f in files_changed[:10]),
+                    inline=False,
+                )
+            if sync_result:
+                embed.add_field(name="Git", value=sync_result, inline=False)
+            if response_text:
+                preview = response_text[:800] + ("..." if len(response_text) > 800 else "")
+                embed.add_field(name="Claude Notes", value="```\n" + preview + "\n```", inline=False)
+
+            await ctx.send(embed=embed)
+
+        except subprocess.TimeoutExpired:
+            await ctx.send("**Claude timed out** (5 minute limit).")
+            log_task("[claude] " + description, "failed", "Timeout")
+        except Exception as e:
+            await ctx.send("**Error:** " + str(e))
+            log_task("[claude] " + description, "failed", str(e))
 
     @bot.command(name="preview")
     async def preview_cmd(ctx):
@@ -147,11 +230,11 @@ def setup_commands(bot: commands.Bot):
         file_count = sum(len(files) for _, _, files in os.walk(os.path.join(PROJECT_DIR, "website")))
 
         embed = discord.Embed(title="Website Preview", color=0xFF6EC7)
-        embed.add_field(name="index.html", value=f"{size} bytes", inline=True)
+        embed.add_field(name="index.html", value=str(size) + " bytes", inline=True)
         embed.add_field(name="Total Files", value=str(file_count), inline=True)
         embed.add_field(
             name="View",
-            value="Website is served at `http://<laptop-ip>:8080`",
+            value="Website is live at `https://simbot.cloud`",
             inline=False,
         )
         await ctx.send(embed=embed)
