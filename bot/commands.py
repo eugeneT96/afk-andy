@@ -1,6 +1,7 @@
 import os
 import json
 import subprocess
+import random
 import discord
 from discord.ext import commands
 from datetime import datetime
@@ -11,139 +12,56 @@ log = logging.getLogger("afk-andy")
 
 PROJECT_DIR = os.path.expanduser("~/afk-andy")
 
+# Andy's personality lines
+ACK_LINES = [
+    "On it, boss. Give me a sec...",
+    "Say less. I'm on it.",
+    "Got it. Putting the engineer on this now...",
+    "Roger that. Brewing some code...",
+    "Heard you loud and clear. Working on it...",
+    "Already on it. Sit tight.",
+    "Copy. Let me cook.",
+]
+
+DONE_LINES = [
+    "Done! Check it out:",
+    "All wrapped up. Here's what I did:",
+    "Boom. Built it. Take a look:",
+    "Ship it! Here's the rundown:",
+    "That's a wrap. Here's the damage report:",
+]
+
+FAIL_LINES = [
+    "Yikes, something broke. Here's what happened:",
+    "Hit a wall on this one:",
+    "Ran into trouble. Details below:",
+    "Not gonna lie, this one didn't go great:",
+]
+
+TIMEOUT_LINES = [
+    "That one was too big for me. Timed out after 5 minutes.",
+    "I choked on that one. Hit the 5 minute limit.",
+    "Took too long, had to bail. Try breaking it into smaller tasks.",
+]
+
+NO_CHANGES_LINES = [
+    "I looked at it but didn't end up changing anything. Might need more detail.",
+    "Hmm, nothing actually changed. Can you be more specific?",
+    "Came back empty-handed. Try rephrasing what you need?",
+]
+
 
 def setup_commands(bot: commands.Bot):
 
     @bot.command(name="build")
     async def build_cmd(ctx, *, description: str = None):
-        """Tell the architect to build something."""
+        """Tell Andy to build something."""
         if not description:
-            await ctx.send("Usage: `!build <description of what to build>`")
+            await ctx.send("You gotta tell me what to build! Try: `!build <what you want>`")
             return
 
-        await ctx.send(f"**Building:** {description}\nArchitect is working on it...")
-
-        from architect import build_task
-        from utils import log_task, update_project_state, git_sync
-
-        # Feed existing website files as context so architect modifies, not replaces
-        from utils import get_file_context
-        context = get_file_context(["index.html", "css/style.css", "js/main.js"])
-        result = build_task(description, context)
-
-        if not result["success"]:
-            await ctx.send(f"**Build failed:** {result['error']}")
-            log_task(description, "failed", result["error"])
-            return
-
-        files_changed = result["files"]
-        response_text = result["response"]
-
-        # Log the task
-        log_task(description, "completed", files_changed)
-        update_project_state(description, files_changed)
-
-        # Auto-sync to GitHub
-        sync_result = git_sync("Build: " + description[:50])
-
-        # Build response embed
-        embed = discord.Embed(
-            title="Build Complete",
-            description=description,
-            color=0x00FF41,
-            timestamp=datetime.utcnow(),
-        )
-        if files_changed:
-            embed.add_field(
-                name="Files Changed",
-                value="\n".join("`" + f + "`" for f in files_changed[:10]),
-                inline=False,
-            )
-        if sync_result:
-            embed.add_field(name="Git", value=sync_result, inline=False)
-
-        # Truncate architect response for Discord
-        if response_text:
-            preview = response_text[:500] + ("..." if len(response_text) > 500 else "")
-            embed.add_field(name="Architect Notes", value="```\n" + preview + "\n```", inline=False)
-
-        await ctx.send(embed=embed)
-
-    @bot.command(name="status")
-    async def status_cmd(ctx):
-        """Get current project status."""
-        state_path = os.path.join(PROJECT_DIR, "memory", "project-state.json")
-        try:
-            with open(state_path) as f:
-                state = json.load(f)
-        except (FileNotFoundError, json.JSONDecodeError):
-            await ctx.send("No project state yet. Use `!build` to start building.")
-            return
-
-        embed = discord.Embed(title="Project Status", color=0x00BFFF)
-        features = state.get("features", [])
-        if features:
-            recent = features[-5:]
-            embed.add_field(
-                name="Recent Features",
-                value="\n".join("- " + f for f in recent),
-                inline=False,
-            )
-        embed.add_field(
-            name="Total Features",
-            value=str(len(features)),
-            inline=True,
-        )
-        await ctx.send(embed=embed)
-
-    @bot.command(name="log")
-    async def log_cmd(ctx):
-        """Show recent task log."""
-        log_path = os.path.join(PROJECT_DIR, "memory", "task-log.json")
-        try:
-            with open(log_path) as f:
-                tasks = json.load(f)
-        except (FileNotFoundError, json.JSONDecodeError):
-            await ctx.send("No tasks logged yet.")
-            return
-
-        recent = tasks[-5:]
-        embed = discord.Embed(title="Recent Tasks", color=0xFFA500)
-        for t in recent:
-            status_icon = "\u2705" if t["status"] == "completed" else "\u274C"
-            embed.add_field(
-                name=status_icon + " " + t["task"][:50],
-                value="Status: " + t["status"] + " | " + t["timestamp"],
-                inline=False,
-            )
-        await ctx.send(embed=embed)
-
-    @bot.command(name="git")
-    async def git_cmd(ctx):
-        """Show recent git activity."""
-        try:
-            result = subprocess.run(
-                ["git", "log", "--oneline", "-10"],
-                capture_output=True,
-                text=True,
-                cwd=PROJECT_DIR,
-            )
-            output = result.stdout.strip() or "No commits yet."
-        except Exception as e:
-            output = "Error: " + str(e)
-
-        embed = discord.Embed(title="Recent Git Log", color=0x6E5494)
-        embed.description = "```\n" + output + "\n```"
-        await ctx.send(embed=embed)
-
-    @bot.command(name="claude")
-    async def claude_cmd(ctx, *, description: str = None):
-        """Use Claude Code (flagship AI) for complex tasks."""
-        if not description:
-            await ctx.send("Usage: `!claude <description of what to build or change>`")
-            return
-
-        await ctx.send("**Claude is working on:** " + description + "\nThis may take a minute...")
+        ack = random.choice(ACK_LINES)
+        await ctx.send("**" + description + "**\n" + ack)
 
         from utils import log_task, update_project_state, git_sync
 
@@ -171,9 +89,10 @@ def setup_commands(bot: commands.Bot):
             )
 
             if result.returncode != 0:
-                error_msg = result.stderr[:500] if result.stderr else "Unknown error"
-                await ctx.send("**Claude failed:** ```" + error_msg + "```")
-                log_task("[claude] " + description, "failed", error_msg)
+                error_msg = result.stderr[:500] if result.stderr else "No details available"
+                fail = random.choice(FAIL_LINES)
+                await ctx.send(fail + "\n```" + error_msg + "```")
+                log_task(description, "failed", error_msg)
                 return
 
             response_text = result.stdout.strip()
@@ -185,56 +104,145 @@ def setup_commands(bot: commands.Bot):
             )
             files_changed = [f for f in diff_result.stdout.strip().split("\n") if f]
 
-            log_task("[claude] " + description, "completed", files_changed)
-            if files_changed:
-                update_project_state("[claude] " + description, files_changed)
+            if not files_changed:
+                await ctx.send(random.choice(NO_CHANGES_LINES))
+                log_task(description, "completed", [])
+                return
 
-            sync_result = git_sync("Claude: " + description[:50])
+            log_task(description, "completed", files_changed)
+            update_project_state(description, files_changed)
 
+            sync_result = git_sync(description[:50])
+
+            done = random.choice(DONE_LINES)
             embed = discord.Embed(
-                title="Claude Build Complete",
+                title=done,
                 description=description,
-                color=0x7C3AED,
+                color=0x00FF41,
                 timestamp=datetime.utcnow(),
             )
-            if files_changed:
-                embed.add_field(
-                    name="Files Changed",
-                    value="\n".join("`" + f + "`" for f in files_changed[:10]),
-                    inline=False,
-                )
+            embed.add_field(
+                name="Files Touched",
+                value="\n".join("`" + f + "`" for f in files_changed[:10]),
+                inline=False,
+            )
             if sync_result:
                 embed.add_field(name="Git", value=sync_result, inline=False)
+            embed.set_footer(text="Live at simbot.cloud")
+
             if response_text:
-                preview = response_text[:800] + ("..." if len(response_text) > 800 else "")
-                embed.add_field(name="Claude Notes", value="```\n" + preview + "\n```", inline=False)
+                preview = response_text[:600] + ("..." if len(response_text) > 600 else "")
+                embed.add_field(name="Andy's Notes", value="```\n" + preview + "\n```", inline=False)
 
             await ctx.send(embed=embed)
 
         except subprocess.TimeoutExpired:
-            await ctx.send("**Claude timed out** (5 minute limit).")
-            log_task("[claude] " + description, "failed", "Timeout")
+            await ctx.send(random.choice(TIMEOUT_LINES))
+            log_task(description, "failed", "Timeout")
         except Exception as e:
-            await ctx.send("**Error:** " + str(e))
-            log_task("[claude] " + description, "failed", str(e))
+            fail = random.choice(FAIL_LINES)
+            await ctx.send(fail + "\n`" + str(e) + "`")
+            log_task(description, "failed", str(e))
 
-    @bot.command(name="preview")
-    async def preview_cmd(ctx):
-        """Get info about the current website state."""
+    @bot.command(name="status")
+    async def status_cmd(ctx):
+        """Ask Andy what's been going on."""
+        state_path = os.path.join(PROJECT_DIR, "memory", "project-state.json")
+        try:
+            with open(state_path) as f:
+                state = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            await ctx.send("Nothing built yet. I'm just sitting here. Give me something to do with `!build`.")
+            return
+
+        features = state.get("features", [])
+        embed = discord.Embed(
+            title="Here's where we're at",
+            color=0x00BFFF,
+        )
+        if features:
+            recent = features[-5:]
+            embed.add_field(
+                name="Latest stuff I built",
+                value="\n".join("- " + f for f in recent),
+                inline=False,
+            )
+        embed.add_field(
+            name="Total features shipped",
+            value=str(len(features)),
+            inline=True,
+        )
+        embed.set_footer(text="Live at simbot.cloud")
+        await ctx.send(embed=embed)
+
+    @bot.command(name="log")
+    async def log_cmd(ctx):
+        """Show Andy's recent work history."""
+        log_path = os.path.join(PROJECT_DIR, "memory", "task-log.json")
+        try:
+            with open(log_path) as f:
+                tasks = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            await ctx.send("No tasks in the log yet. I've been slacking.")
+            return
+
+        recent = tasks[-5:]
+        embed = discord.Embed(title="My recent work", color=0xFFA500)
+        for t in recent:
+            icon = "\u2705" if t["status"] == "completed" else "\u274C"
+            embed.add_field(
+                name=icon + " " + t["task"][:50],
+                value=t["status"] + " | " + t["timestamp"],
+                inline=False,
+            )
+        await ctx.send(embed=embed)
+
+    @bot.command(name="git")
+    async def git_cmd(ctx):
+        """Show recent commits."""
+        try:
+            result = subprocess.run(
+                ["git", "log", "--oneline", "-10"],
+                capture_output=True,
+                text=True,
+                cwd=PROJECT_DIR,
+            )
+            output = result.stdout.strip() or "No commits yet."
+        except Exception as e:
+            output = "Error: " + str(e)
+
+        embed = discord.Embed(title="Git history", color=0x6E5494)
+        embed.description = "```\n" + output + "\n```"
+        await ctx.send(embed=embed)
+
+    @bot.command(name="site")
+    async def site_cmd(ctx):
+        """Check on the website."""
         index_path = os.path.join(PROJECT_DIR, "website", "index.html")
         if not os.path.exists(index_path):
-            await ctx.send("No website built yet. Use `!build` to create one.")
+            await ctx.send("No website yet. Tell me what to build!")
             return
 
         size = os.path.getsize(index_path)
         file_count = sum(len(files) for _, _, files in os.walk(os.path.join(PROJECT_DIR, "website")))
 
-        embed = discord.Embed(title="Website Preview", color=0xFF6EC7)
+        embed = discord.Embed(title="The site's up", color=0xFF6EC7)
         embed.add_field(name="index.html", value=str(size) + " bytes", inline=True)
-        embed.add_field(name="Total Files", value=str(file_count), inline=True)
+        embed.add_field(name="Total files", value=str(file_count), inline=True)
         embed.add_field(
-            name="View",
-            value="Website is live at `https://simbot.cloud`",
+            name="Check it out",
+            value="**https://simbot.cloud**",
             inline=False,
         )
         await ctx.send(embed=embed)
+
+    @bot.command(name="yo")
+    async def yo_cmd(ctx):
+        """Just say hi to Andy."""
+        greetings = [
+            "Yo! What's good? Need me to build something?",
+            "What's up! I'm online and ready to work.",
+            "Hey! Got a task for me? Hit me with `!build <whatever>`.",
+            "Sup. I'm here, I'm caffeinated, and I'm ready to code.",
+        ]
+        await ctx.send(random.choice(greetings))
