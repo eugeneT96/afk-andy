@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flappy Bird — Summit Games</title>
+    <title>Snake — Summit Games</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -12,18 +12,18 @@
             <div class="logo"><a href="index.html" style="color: inherit; text-decoration: none;">Sum<span class="accent">mit</span></a></div>
             <ul class="nav-links">
                 <li><a href="index.html">Home</a></li>
-                <li><a href="flappy.html" class="active">Flappy Bird</a></li>
-                <li><a href="snake.html">Snake</a></li>
+                <li><a href="flappy.html">Flappy Bird</a></li>
+                <li><a href="snake.html" class="active">Snake</a></li>
             </ul>
         </nav>
     </header>
 
     <main class="game-container">
-        <h1>Flappy <span class="accent">Bird</span></h1>
-        <p class="game-instructions">Press SPACE or tap to fly. Avoid the pipes!</p>
+        <h1>Snake <span class="accent">Game</span></h1>
+        <p class="game-instructions">Use arrow keys or WASD to move. Eat food to grow!</p>
 
         <div class="game-wrapper">
-            <canvas id="flappy-canvas" width="400" height="600"></canvas>
+            <canvas id="snake-canvas" width="400" height="400"></canvas>
             <div class="game-overlay" id="game-overlay">
                 <div class="overlay-content">
                     <h2 id="overlay-title">Ready?</h2>
@@ -49,6 +49,6 @@
         <p>&copy; 2026 Summit — Your path to the top.</p>
     </footer>
 
-    <script src="js/flappy.js"></script>
+    <script src="js/snake.js"></script>
 </body>
 </html>
