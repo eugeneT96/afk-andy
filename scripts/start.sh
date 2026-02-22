@@ -24,4 +24,4 @@ cd ..
 # Start Discord bot
 echo "[3/3] Starting Discord bot..."
 cd bot
-python3 main.py
+~/afk-andy/venv/bin/python main.py

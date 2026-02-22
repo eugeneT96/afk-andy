@@ -7,7 +7,8 @@ cd ~/afk-andy
 
 # Install Python dependencies
 echo "[1/3] Installing Python dependencies..."
-pip3 install -r requirements.txt
+python3 -m venv venv
+venv/bin/pip install -r requirements.txt
 
 # Check Ollama
 echo "[2/3] Checking Ollama..."
