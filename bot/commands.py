@@ -25,7 +25,10 @@ def setup_commands(bot: commands.Bot):
         from architect import build_task
         from utils import log_task, update_project_state, git_sync
 
-        result = build_task(description)
+        # Feed existing website files as context so architect modifies, not replaces
+        from utils import get_file_context
+        context = get_file_context(["index.html", "css/style.css", "js/main.js"])
+        result = build_task(description, context)
 
         if not result["success"]:
             await ctx.send(f"**Build failed:** {result['error']}")

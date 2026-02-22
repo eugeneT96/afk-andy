@@ -11,15 +11,17 @@ MODEL = os.getenv("OLLAMA_MODEL", "qwen3:4b")
 PROJECT_DIR = os.path.expanduser("~/afk-andy")
 
 SYSTEM_PROMPT = """You are AFK Andy's AI architect. You are a focused web developer.
-Your job is to write clean, simple HTML/CSS/JS code for a gaming website.
+Your job is to modify and extend an existing gaming website (dark theme, neon green accents).
 
 Rules:
-- Write complete file contents when asked to create or modify files.
+- You will receive the CURRENT file contents in the CONTEXT section.
+- MODIFY the existing code — do NOT rewrite from scratch.
+- Keep the existing design: dark background (#0a0a0f), neon green (#00ff41), existing CSS classes.
+- Use the existing external CSS file (css/style.css) — do NOT use inline styles.
 - Use vanilla HTML, CSS, and JavaScript only.
-- Keep code simple and well-structured.
-- When outputting code, wrap each file in a block like:
+- When outputting code, wrap each COMPLETE file in a block like:
   === FILE: path/relative/to/website ===
-  <file contents>
+  <full file contents with your changes incorporated>
   === END FILE ===
 - Only output files that need to change.
 - Be concise in explanations.
@@ -28,7 +30,8 @@ Rules:
 
 def query_architect(task: str, context: str = "") -> dict:
     """Send a structured task to the local Qwen model and get a response."""
-    prompt = f"TASK: {task}"
+    prompt = f"/no_think
+TASK: {task}"
     if context:
         prompt += f"\n\nCONTEXT:\n{context}"
 
@@ -40,9 +43,9 @@ def query_architect(task: str, context: str = "") -> dict:
                 "prompt": prompt,
                 "system": SYSTEM_PROMPT,
                 "stream": False,
-                "options": {"temperature": 0.3, "num_predict": 4096},
+                "options": {"temperature": 0.3, "num_predict": 8192},
             },
-            timeout=120,
+            timeout=300,
         )
         resp.raise_for_status()
         data = resp.json()
