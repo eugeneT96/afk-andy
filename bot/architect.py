@@ -28,12 +28,11 @@ Rules:
 """
 
 
-def query_architect(task: str, context: str = "") -> dict:
+def query_architect(task, context=""):
     """Send a structured task to the local Qwen model and get a response."""
-    prompt = f"/no_think
-TASK: {task}"
+    prompt = "/no_think\nTASK: " + task
     if context:
-        prompt += f"\n\nCONTEXT:\n{context}"
+        prompt = prompt + "\n\nCONTEXT:\n" + context
 
     try:
         resp = requests.post(
@@ -53,12 +52,12 @@ TASK: {task}"
     except requests.ConnectionError:
         return {"success": False, "response": "", "error": "Ollama is not running. Start it with: ollama serve"}
     except requests.Timeout:
-        return {"success": False, "response": "", "error": "Architect timed out (120s limit)."}
+        return {"success": False, "response": "", "error": "Architect timed out (300s limit)."}
     except Exception as e:
         return {"success": False, "response": "", "error": str(e)}
 
 
-def parse_file_blocks(response: str) -> list:
+def parse_file_blocks(response):
     """Parse === FILE: ... === blocks from architect response into file operations."""
     files = []
     lines = response.split("\n")
@@ -84,7 +83,7 @@ def parse_file_blocks(response: str) -> list:
     return files
 
 
-def apply_file_changes(files: list) -> list:
+def apply_file_changes(files):
     """Write parsed file blocks to disk. Returns list of written paths."""
     written = []
     website_dir = os.path.join(PROJECT_DIR, "website")
@@ -95,14 +94,14 @@ def apply_file_changes(files: list) -> list:
         with open(filepath, "w") as fh:
             fh.write(f["content"])
         written.append(f["path"])
-        log.info(f"Wrote: {filepath}")
+        log.info("Wrote: " + filepath)
 
     return written
 
 
-def build_task(task_description: str, context: str = "") -> dict:
+def build_task(task_description, context=""):
     """Full pipeline: query architect -> parse files -> write to disk."""
-    log.info(f"Architect received task: {task_description}")
+    log.info("Architect received task: " + task_description)
 
     result = query_architect(task_description, context)
     if not result["success"]:
