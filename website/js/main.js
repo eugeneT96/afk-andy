@@ -1,4 +1,4 @@
-// MathMatrix — Main JS
+// Summit — Climbing Website Main JS
 // Smooth scroll for anchor links
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
@@ -10,7 +10,7 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     });
 });
 
-// Add subtle parallax effect to floating math symbols
+// Add subtle parallax effect to floating climbing symbols
 document.addEventListener('mousemove', (e) => {
     const symbols = document.querySelectorAll('.float-symbol');
     const mouseX = e.clientX / window.innerWidth - 0.5;

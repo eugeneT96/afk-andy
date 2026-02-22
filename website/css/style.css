@@ -157,8 +157,8 @@ footer {
     border-top: 1px solid #1a1a2e;
 }
 
-/* Math Floating Symbols */
-.math-symbols {
+/* Climbing Floating Symbols */
+.climb-symbols {
     position: absolute;
     width: 100%;
     height: 100%;
@@ -171,8 +171,7 @@ footer {
 .float-symbol {
     position: absolute;
     font-size: clamp(2rem, 5vw, 4rem);
-    color: var(--accent);
-    opacity: 0.15;
+    opacity: 0.2;
     animation: float 6s ease-in-out infinite;
 }
 
@@ -188,17 +187,15 @@ footer {
     50% { transform: translateY(-20px) rotate(5deg); }
 }
 
-/* Math Card Icons */
-.math-card {
+/* Climbing Card Icons */
+.climb-card {
     position: relative;
 }
 
-.math-icon {
+.climb-icon {
     font-size: 2.5rem;
-    color: var(--accent);
     margin-bottom: 1rem;
-    font-weight: 700;
-    text-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+    filter: drop-shadow(0 0 10px rgba(0, 255, 65, 0.3));
 }
 
 /* Practice Stats */
