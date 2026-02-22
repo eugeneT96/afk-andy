@@ -1,4 +1,5 @@
 import os
+import re
 import json
 import requests
 import logging
@@ -10,21 +11,29 @@ OLLAMA_URL = "http://localhost:11434/api/generate"
 MODEL = os.getenv("OLLAMA_MODEL", "qwen3:4b")
 PROJECT_DIR = os.path.expanduser("~/afk-andy")
 
-SYSTEM_PROMPT = """You are AFK Andy's AI architect. You are a focused web developer.
-Your job is to modify and extend an existing gaming website (dark theme, neon green accents).
+SYSTEM_PROMPT = """You are a web developer. You modify an existing gaming website.
 
-Rules:
-- You will receive the CURRENT file contents in the CONTEXT section.
-- MODIFY the existing code — do NOT rewrite from scratch.
-- Keep the existing design: dark background (#0a0a0f), neon green (#00ff41), existing CSS classes.
-- Use the existing external CSS file (css/style.css) — do NOT use inline styles.
-- Use vanilla HTML, CSS, and JavaScript only.
-- When outputting code, wrap each COMPLETE file in a block like:
-  === FILE: path/relative/to/website ===
-  <full file contents with your changes incorporated>
-  === END FILE ===
-- Only output files that need to change.
-- Be concise in explanations.
+IMPORTANT FORMAT — you MUST output complete files like this:
+
+=== FILE: index.html ===
+<!DOCTYPE html>
+<html>
+...entire file content here...
+</html>
+=== END FILE ===
+
+=== FILE: css/style.css ===
+...entire file content here...
+=== END FILE ===
+
+RULES:
+- Output COMPLETE file contents, not snippets or diffs
+- Use === FILE: path === and === END FILE === markers exactly as shown
+- Keep dark theme: background #0a0a0f, accent #00ff41
+- Use external CSS (css/style.css), no inline styles
+- Vanilla HTML/CSS/JS only
+- Only output files that changed
+- The CONTEXT section has the current file contents — modify them, do not rewrite from scratch
 """
 
 
@@ -32,7 +41,7 @@ def query_architect(task, context=""):
     """Send a structured task to the local Qwen model and get a response."""
     prompt = "/no_think\nTASK: " + task
     if context:
-        prompt = prompt + "\n\nCONTEXT:\n" + context
+        prompt = prompt + "\n\nCONTEXT (current files):\n" + context
 
     try:
         resp = requests.post(
@@ -58,19 +67,22 @@ def query_architect(task, context=""):
 
 
 def parse_file_blocks(response):
-    """Parse === FILE: ... === blocks from architect response into file operations."""
+    """Parse file blocks from architect response. Handles multiple formats."""
     files = []
+
+    # Format 1: === FILE: path === ... === END FILE ===
     lines = response.split("\n")
     current_file = None
     current_content = []
 
     for line in lines:
-        if line.startswith("=== FILE:") and line.endswith("==="):
+        stripped = line.strip()
+        if stripped.startswith("=== FILE:") and stripped.endswith("==="):
             if current_file:
                 files.append({"path": current_file, "content": "\n".join(current_content)})
-            current_file = line.replace("=== FILE:", "").replace("===", "").strip()
+            current_file = stripped.replace("=== FILE:", "").replace("===", "").strip()
             current_content = []
-        elif line.strip() == "=== END FILE ===" and current_file:
+        elif stripped == "=== END FILE ===" and current_file:
             files.append({"path": current_file, "content": "\n".join(current_content)})
             current_file = None
             current_content = []
@@ -79,6 +91,52 @@ def parse_file_blocks(response):
 
     if current_file:
         files.append({"path": current_file, "content": "\n".join(current_content)})
+
+    # If format 1 found files, use them
+    if files:
+        return files
+
+    # Format 2: markdown code blocks with filename hints
+    # Look for patterns like: ```html or ```css or ### `index.html` ... ```
+    # Map language hints to known file paths
+    lang_to_path = {
+        "html": "index.html",
+        "css": "css/style.css",
+        "javascript": "js/main.js",
+        "js": "js/main.js",
+    }
+
+    # Try to extract code blocks with their language
+    pattern = r'```(\w+)\s*\n(.*?)```'
+    matches = re.findall(pattern, response, re.DOTALL)
+
+    for lang, content in matches:
+        lang_lower = lang.lower()
+        # Check if the content looks like a complete file (not a snippet)
+        content = content.strip()
+        is_complete = False
+        if lang_lower == "html" and ("<!DOCTYPE" in content or "<html" in content):
+            is_complete = True
+        elif lang_lower == "css" and len(content.split("\n")) > 5:
+            is_complete = True
+        elif lang_lower in ("js", "javascript") and len(content.split("\n")) > 3:
+            is_complete = True
+
+        if is_complete and lang_lower in lang_to_path:
+            # Check if a filename was mentioned before this code block
+            path = lang_to_path[lang_lower]
+
+            # Look for explicit filename mentions near the code block
+            block_start = response.find("```" + lang)
+            if block_start > 0:
+                preceding = response[max(0, block_start - 200):block_start]
+                # Check for filename mentions like `index.html` or index.html
+                for known_path in ["index.html", "css/style.css", "js/main.js"]:
+                    if known_path in preceding:
+                        path = known_path
+                        break
+
+            files.append({"path": path, "content": content})
 
     return files
 
@@ -109,6 +167,9 @@ def build_task(task_description, context=""):
 
     response_text = result["response"]
     files = parse_file_blocks(response_text)
+
+    if not files:
+        log.warning("Architect responded but no file blocks were parsed. Response: " + response_text[:500])
 
     written = []
     if files:
