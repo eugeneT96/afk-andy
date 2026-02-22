@@ -3,11 +3,15 @@
     "Add a \"Latest Updates\" section below features with 3 placeholder update cards showing date and description",
     "add a \"Now Building\" banner at the top that says AFK Andy is online",
     "add a \"Now Building\" banner at the top that says AFK Andy is online",
-    "add a \"Now Building\" banner at the top that says AFK Andy is online"
+    "add a \"Now Building\" banner at the top that says AFK Andy is online",
+    "make the front page look like it's a math study website"
   ],
   "files": [
     "index.html",
-    "css/style.css"
+    "css/style.css",
+    "website/css/style.css",
+    "website/index.html",
+    "website/js/main.js"
   ],
-  "last_updated": "2026-02-22T20:35:54.726842"
+  "last_updated": "2026-02-22T21:02:45.528994"
 }

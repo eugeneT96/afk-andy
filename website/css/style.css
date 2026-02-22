@@ -157,6 +157,87 @@ footer {
     border-top: 1px solid #1a1a2e;
 }
 
+/* Math Floating Symbols */
+.math-symbols {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.float-symbol {
+    position: absolute;
+    font-size: clamp(2rem, 5vw, 4rem);
+    color: var(--accent);
+    opacity: 0.15;
+    animation: float 6s ease-in-out infinite;
+}
+
+.float-symbol:nth-child(1) { top: 15%; left: 10%; animation-delay: 0s; }
+.float-symbol:nth-child(2) { top: 25%; right: 15%; animation-delay: 1s; }
+.float-symbol:nth-child(3) { top: 60%; left: 8%; animation-delay: 2s; }
+.float-symbol:nth-child(4) { top: 70%; right: 10%; animation-delay: 3s; }
+.float-symbol:nth-child(5) { top: 40%; left: 85%; animation-delay: 4s; }
+.float-symbol:nth-child(6) { top: 80%; left: 20%; animation-delay: 5s; }
+
+@keyframes float {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(5deg); }
+}
+
+/* Math Card Icons */
+.math-card {
+    position: relative;
+}
+
+.math-icon {
+    font-size: 2.5rem;
+    color: var(--accent);
+    margin-bottom: 1rem;
+    font-weight: 700;
+    text-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+}
+
+/* Practice Stats */
+.practice-stats {
+    display: flex;
+    justify-content: center;
+    gap: 3rem;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+}
+
+.stat-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    background: var(--bg-card);
+    border: 1px solid #1a1a2e;
+    border-radius: 8px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.stat-box:hover {
+    border-color: var(--accent);
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: var(--accent);
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+}
+
 /* Responsive */
 @media (max-width: 600px) {
     .hero-content h1 {
@@ -170,5 +251,14 @@ footer {
     }
     .section {
         padding: 3rem 1.5rem;
+    }
+    .practice-stats {
+        gap: 1rem;
+    }
+    .stat-box {
+        padding: 1rem 1.5rem;
+    }
+    .float-symbol {
+        opacity: 0.1;
     }
 }
