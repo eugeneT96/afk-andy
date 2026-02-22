@@ -12,5 +12,20 @@
     "status": "completed",
     "details": [],
     "timestamp": "2026-02-22T18:02:42.290533"
+  },
+  {
+    "task": "[claude] add a particle effect background with floating neon green dots",
+    "status": "failed",
+    "details": "Unknown error",
+    "timestamp": "2026-02-22T18:06:16.012076"
+  },
+  {
+    "task": "add a \"Now Building\" banner at the top that says AFK Andy is online",
+    "status": "completed",
+    "details": [
+      "index.html",
+      "css/style.css"
+    ],
+    "timestamp": "2026-02-22T19:51:29.348442"
   }
 ]
