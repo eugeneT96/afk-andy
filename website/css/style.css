@@ -7,8 +7,8 @@
 :root {
     --bg-dark: #0a0a0f;
     --bg-card: #12121a;
-    --accent: #00ff41;
-    --accent-dim: #00cc33;
+    --accent: #00d4ff;
+    --accent-dim: #00a8cc;
     --text: #e0e0e0;
     --text-muted: #888;
 }
@@ -67,7 +67,7 @@ body {
     justify-content: center;
     align-items: center;
     text-align: center;
-    background: radial-gradient(ellipse at center, #0f1a0f 0%, var(--bg-dark) 70%);
+    background: radial-gradient(ellipse at center, #0f151a 0%, var(--bg-dark) 70%);
     position: relative;
 }
 
@@ -195,7 +195,7 @@ footer {
 .climb-icon {
     font-size: 2.5rem;
     margin-bottom: 1rem;
-    filter: drop-shadow(0 0 10px rgba(0, 255, 65, 0.3));
+    filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.3));
 }
 
 /* Practice Stats */
@@ -220,7 +220,7 @@ footer {
 
 .stat-box:hover {
     border-color: var(--accent);
-    box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
 }
 
 .stat-number {
