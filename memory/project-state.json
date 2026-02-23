@@ -9,7 +9,8 @@
     "switch theme to diff color",
     "a flappy bird game that is in a separate tab",
     "add another tab with a game",
-    "change the color sceem to a dark night sky all over like BG and all"
+    "change the color sceem to a dark night sky all over like BG and all",
+    "a secret part that is a proxy that you can only get to by doing https://simbot.cloud/poxy and typing in a code the code could be sun-moon123"
   ],
   "files": [
     "index.html",
@@ -19,5 +20,5 @@
     "website/js/main.js",
     "website/flappy.html"
   ],
-  "last_updated": "2026-02-23T18:50:07.721993"
+  "last_updated": "2026-02-23T18:57:32.418922"
 }

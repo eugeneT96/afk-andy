@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Access Denied</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="proxy-container">
+        <div class="proxy-terminal">
+            <div class="terminal-header">
+                <span class="terminal-dot red"></span>
+                <span class="terminal-dot yellow"></span>
+                <span class="terminal-dot green"></span>
+                <span class="terminal-title">secure_access.sh</span>
+            </div>
+            <div class="terminal-body">
+                <div class="terminal-line">
+                    <span class="prompt">$</span> Attempting connection...
+                </div>
+                <div class="terminal-line">
+                    <span class="prompt">[!]</span> <span class="warning">ACCESS RESTRICTED</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="prompt">$</span> Enter authorization code:
+                </div>
+                <div class="code-input-wrapper">
+                    <span class="prompt">></span>
+                    <input type="password" id="proxy-code" class="code-input" placeholder="••••••••••••" autocomplete="off" autofocus>
+                </div>
+                <div id="code-feedback" class="code-feedback"></div>
+                <button id="submit-code" class="submit-btn">AUTHENTICATE</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="proxy-unlocked" class="proxy-unlocked hidden">
+        <nav class="nav">
+            <div class="logo">Pro<span class="accent">xy</span></div>
+            <a href="index.html" class="nav-back">← Back to Summit</a>
+        </nav>
+        <div class="proxy-content">
+            <h1>Welcome to the <span class="accent">Shadow Network</span></h1>
+            <p class="proxy-subtitle">You've found the secret gateway. Browse anonymously.</p>
+
+            <div class="proxy-search-box">
+                <input type="text" id="proxy-url" class="proxy-input" placeholder="Enter URL to browse...">
+                <button id="proxy-go" class="proxy-btn">GO</button>
+            </div>
+
+            <div id="proxy-frame-container" class="proxy-frame-container hidden">
+                <div class="frame-header">
+                    <span id="current-url" class="current-url"></span>
+                    <button id="close-frame" class="close-frame-btn">×</button>
+                </div>
+                <iframe id="proxy-frame" class="proxy-frame" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
+            </div>
+
+            <div class="proxy-notice">
+                <p>Note: Some sites may block iframe embedding. This is a client-side demo proxy.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/proxy.js"></script>
+</body>
+</html>
