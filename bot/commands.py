@@ -1,3 +1,5 @@
+import os
+import subprocess
 import random
 import discord
 from discord.ext import commands
@@ -6,6 +8,8 @@ import asyncio
 import logging
 
 log = logging.getLogger("afk-andy")
+
+PROJECT_DIR = os.path.expanduser("~/afk-andy")
 
 # Personality lines
 START_LINES = [
@@ -29,6 +33,28 @@ FAIL_LINES = [
     "Yikes, something broke:",
     "Hit a wall on this one:",
     "Ran into trouble:",
+]
+
+ACK_LINES = [
+    "On it, boss. Give me a sec...",
+    "Say less. I'm on it.",
+    "Got it. Let me think about this...",
+    "Roger that. Working on it...",
+    "Copy. Let me cook.",
+]
+
+PROGRESS_LINES = [
+    "Thinking about the best approach...",
+    "Running some commands...",
+    "Almost there...",
+    "Figuring it out...",
+    "Working on it...",
+]
+
+DONE_LINES = [
+    "Done! Here's what I did:",
+    "All wrapped up:",
+    "Handled it:",
 ]
 
 
@@ -161,6 +187,103 @@ def setup_commands(bot: commands.Bot):
             await ctx.send("World saved!")
         except Exception as e:
             await ctx.send(f"Save failed: `{e}`")
+
+    @bot.command(name="build")
+    async def build_cmd(ctx, *, description: str = None):
+        """Hand off a complex task to Claude Code CLI."""
+        if not description:
+            await ctx.send("What do you need? Usage: `!build <describe what you want>`")
+            return
+
+        ack = random.choice(ACK_LINES)
+        await ctx.send(f"**{description}**\n{ack}")
+
+        async def send_progress(stop_event):
+            available = list(PROGRESS_LINES)
+            random.shuffle(available)
+            try:
+                await asyncio.wait_for(stop_event.wait(), timeout=15)
+                return
+            except asyncio.TimeoutError:
+                pass
+            while not stop_event.is_set() and available:
+                await ctx.send(f"*{available.pop()}*")
+                try:
+                    await asyncio.wait_for(stop_event.wait(), timeout=25)
+                    return
+                except asyncio.TimeoutError:
+                    pass
+
+        stop_event = asyncio.Event()
+        progress_task = asyncio.create_task(send_progress(stop_event))
+
+        try:
+            rcon_script = os.path.join(PROJECT_DIR, "scripts", "rcon.py")
+            python_bin = os.path.join(PROJECT_DIR, "venv", "bin", "python")
+            prompt = (
+                f"You are managing a Minecraft server. "
+                f"To send commands to the server, run: {python_bin} {rcon_script} <command>\n"
+                f"Examples:\n"
+                f"  {python_bin} {rcon_script} time set day\n"
+                f"  {python_bin} {rcon_script} gamemode creative Steve\n"
+                f"  {python_bin} {rcon_script} gamerule doDaylightCycle false\n"
+                f"  {python_bin} {rcon_script} whitelist add Steve\n"
+                f"  {python_bin} {rcon_script} give Steve diamond 64\n\n"
+                f"Server config is at /home/eugene/minecraft-server/server.properties\n"
+                f"TASK: {description}\n"
+                f"Do what's needed. If it requires multiple commands, run them all."
+            )
+
+            loop = asyncio.get_event_loop()
+            result = await loop.run_in_executor(
+                None,
+                lambda: subprocess.run(
+                    [
+                        "claude", "-p", "--output-format", "text",
+                        "--allowedTools", "Bash Read Edit Write Glob Grep",
+                        "--max-budget-usd", "1.00",
+                        prompt,
+                    ],
+                    capture_output=True,
+                    text=True,
+                    timeout=300,
+                    cwd=PROJECT_DIR,
+                )
+            )
+
+            stop_event.set()
+            await progress_task
+
+            if result.returncode != 0:
+                error_msg = result.stderr[:500] if result.stderr else "No details"
+                await ctx.send(f"{random.choice(FAIL_LINES)}\n```{error_msg}```")
+                return
+
+            response_text = result.stdout.strip()
+            done = random.choice(DONE_LINES)
+
+            embed = discord.Embed(
+                title=done,
+                description=description,
+                color=0x00FF41,
+                timestamp=datetime.utcnow(),
+            )
+
+            if response_text:
+                preview = response_text[:800] + ("..." if len(response_text) > 800 else "")
+                embed.add_field(name="Andy's Notes", value=f"```\n{preview}\n```", inline=False)
+
+            embed.set_footer(text="Powered by Claude")
+            await ctx.send(embed=embed)
+
+        except subprocess.TimeoutExpired:
+            stop_event.set()
+            await progress_task
+            await ctx.send("That one took too long. Timed out after 5 minutes.")
+        except Exception as e:
+            stop_event.set()
+            await progress_task
+            await ctx.send(f"{random.choice(FAIL_LINES)} `{e}`")
 
     @bot.command(name="yo")
     async def yo_cmd(ctx):
