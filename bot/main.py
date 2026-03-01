@@ -124,13 +124,13 @@ async def on_message(message):
         return
     if message.channel.id != CHANNEL_ID:
         return
-    if message.author.id not in ALLOWED_USERS:
-        return
-
     content = message.content.strip()
 
-    # If it's a command, just react and process
+    # Commands — only Leo and Eugene
     if content.startswith("!"):
+        if message.author.id not in ALLOWED_USERS:
+            await message.add_reaction("\U0001f6ab")  # no entry
+            return
         await message.add_reaction("\u2705")
         await bot.process_commands(message)
         return
