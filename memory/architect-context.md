@@ -1,17 +1,14 @@
-# AFK Andy — Architect Context
+# AFK Andy — Context
 
 ## Project
-Gaming website built iteratively via Discord commands.
+Discord bot that manages a Paper Minecraft server via RCON.
 
 ## Stack
-- Vanilla HTML, CSS, JavaScript
-- Simple file structure under website/
-
-## Design Guidelines
-- Modern gaming aesthetic (dark theme, neon accents)
-- Mobile responsive
-- Clean, readable code the AI can easily modify
-- No heavy frameworks
+- Python + discord.py
+- Paper MC server
+- RCON communication (mcrcon)
+- GNU screen for process management
 
 ## Current State
-- Fresh project, no features built yet.
+- Pivoted from website builder to MC server manager.
+- Bot commands: !start, !stop, !restart, !status, !players, !whitelist, !cmd, !say, !backup

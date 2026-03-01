@@ -1,26 +1,4 @@
 {
-  "features": [
-    "Add a \"Latest Updates\" section below features with 3 placeholder update cards showing date and description",
-    "add a \"Now Building\" banner at the top that says AFK Andy is online",
-    "add a \"Now Building\" banner at the top that says AFK Andy is online",
-    "add a \"Now Building\" banner at the top that says AFK Andy is online",
-    "make the front page look like it's a math study website",
-    "make my website about climbing",
-    "switch theme to diff color",
-    "a flappy bird game that is in a separate tab",
-    "add another tab with a game",
-    "change the color sceem to a dark night sky all over like BG and all",
-    "a secret part that is a proxy that you can only get to by doing https://simbot.cloud/poxy and typing in a code the code could be sun-moon123",
-    "Build a tiny reverse-proxy website that serves DuckDuckGo only.\n\nRequirements:\n- Use Node.js with NO external packages (only built-in http/https).\n- Create a server file (server.js) that listens on process.env.PORT (fallback 8080).\n- For every incoming request, forward the same method, path, query string, and body to https://duckduckgo.com.\n- Set the upstream Host header to duckduckgo.com.\n- Stream the upstream response back to the client (status, headers, body).\n- Do NOT allow proxying to any other domain (hardcode duckduckgo.com).\n- Add basic error handling (return 502 on upstream error).\n- Deploy it as a web service so visiting / shows DuckDuckGo and /?q=test performs a search.\n\nOptional (nice-to-have):\n- If the upstream sends a Location header pointing to https://duckduckgo.com/..., rewrite it to a relative path so redirects stay inside the proxy."
-  ],
-  "files": [
-    "index.html",
-    "css/style.css",
-    "website/css/style.css",
-    "website/index.html",
-    "website/js/main.js",
-    "website/flappy.html",
-    "memory/task-log.json"
-  ],
-  "last_updated": "2026-02-23T19:11:07.433293"
+  "server_type": "paper",
+  "last_updated": null
 }

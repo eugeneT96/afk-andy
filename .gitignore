@@ -5,3 +5,18 @@ node_modules/
 memory/errors.log
 .vscode/
 venv/
+
+# Minecraft server
+minecraft/*.jar
+minecraft/world/
+minecraft/world_nether/
+minecraft/world_the_end/
+minecraft/logs/
+minecraft/cache/
+minecraft/plugins/
+minecraft/banned-ips.json
+minecraft/banned-players.json
+minecraft/ops.json
+minecraft/whitelist.json
+minecraft/usercache.json
+minecraft/versions/

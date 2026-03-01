@@ -3,25 +3,11 @@ set -e
 
 cd ~/afk-andy
 
-echo "=== Starting AFK Andy ==="
-
-# Start Ollama in background if not running
-if ! pgrep -x "ollama" > /dev/null; then
-    echo "[1/3] Starting Ollama..."
-    ollama serve &
-    sleep 3
-else
-    echo "[1/3] Ollama already running."
-fi
-
-# Start website server in background
-echo "[2/3] Starting website server on port 8080..."
-cd website
-python3 -m http.server 8080 &
-WEBPID=$!
-cd ..
+echo "=== Starting AFK Andy (MC Manager) ==="
+echo "MC server is started via Discord (!start command)"
+echo ""
 
 # Start Discord bot
-echo "[3/3] Starting Discord bot..."
+echo "Starting Discord bot..."
 cd bot
 ~/afk-andy/venv/bin/python main.py

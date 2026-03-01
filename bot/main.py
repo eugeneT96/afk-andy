@@ -35,10 +35,10 @@ CHAT_RESPONSES = {
         "triggers": ["hey andy", "hi andy", "yo andy", "sup andy", "hello andy", "whats up andy", "hey", "yo", "sup", "hello"],
         "replies": [
             "Yo! What's up?",
-            "Hey! Need something built?",
-            "What's good! Got a task for me?",
-            "Sup! I'm here. Hit me with a `!build` if you need something.",
-            "Hey hey! What are we working on?",
+            "Hey! Need something?",
+            "What's good! Server's running smooth.",
+            "Sup! I'm here. `!status` to check the server.",
+            "Hey hey! What's the move?",
         ],
     },
     "thanks": {
@@ -54,16 +54,16 @@ CHAT_RESPONSES = {
     "how": {
         "triggers": ["how are you", "how you doing", "you good", "you alive"],
         "replies": [
-            "I'm good! Servers are warm, code is flowing. You?",
+            "I'm good! Server's warm, blocks are flowing. You?",
             "Living the dream. Literally. I'm a bot.",
-            "Running smooth. Ready to build whenever you are.",
+            "Running smooth. Server's up and ready.",
             "Online and caffeinated. Well, electrically speaking.",
         ],
     },
     "what": {
         "triggers": ["what can you do", "what do you do", "help", "commands"],
         "replies": [
-            "Here's what I got:\n`!build <task>` - I'll build/change the website\n`!status` - What's been built\n`!log` - My recent work\n`!git` - Git history\n`!site` - Website info\n`!yo` - Just say hi\n\nOr just talk to me, I'm not just a command bot!",
+            "Here's what I got:\n`!start` - Start the MC server\n`!stop` - Stop the server\n`!restart` - Restart the server\n`!status` - Server info + players\n`!players` - Who's online\n`!whitelist add/remove/list` - Manage whitelist\n`!cmd <command>` - Run any MC command\n`!say <message>` - Chat in-game from Discord\n`!backup` - Save the world\n`!yo` - Just say hi\n\nOr just talk to me, I'm not just a command bot!",
         ],
     },
     "opinion": {
@@ -78,9 +78,9 @@ CHAT_RESPONSES = {
     "bored": {
         "triggers": ["im bored", "i'm bored", "nothing to do", "boring"],
         "replies": [
-            "Bored? Let's build something wild. Give me a `!build` challenge.",
-            "You're bored but I'm right here? Come on, let's make something cool.",
-            "I'm literally a website-building AI and you're bored? `!build` something!",
+            "Bored? Hop on the server! `!start` if it's not running.",
+            "You're bored but the server's right here? Go mine something.",
+            "Bored? Sounds like you need to go punch some trees.",
         ],
     },
     "funny": {
@@ -97,10 +97,10 @@ CHAT_RESPONSES = {
 
 # Fallback when nothing matches
 FALLBACK_REPLIES = [
-    "Not sure what you mean, but I'm here! Need a `!build`?",
-    "I'm better at building websites than conversations, ngl. Try `!build <something>`.",
-    "Hmm, didn't catch that. But if you need something built, I'm your bot.",
-    "I hear you. Want me to do something? `!build` is the magic word.",
+    "Not sure what you mean, but I'm here! Need `!status`?",
+    "I'm better at managing servers than conversations, ngl. Try `!status`.",
+    "Hmm, didn't catch that. `!start` or `!status` if you need the server.",
+    "I hear you. Want me to do something? Try `!start` or `!status`.",
 ]
 
 
@@ -110,10 +110,10 @@ async def on_ready():
     channel = bot.get_channel(CHANNEL_ID)
     if channel:
         startup = random.choice([
-            "AFK Andy is online. Ready to build. Send `!build` to get started.",
-            "I'm back! What are we building today?",
-            "Andy's in the building. Literally. What's the move?",
-            "Online and ready. Drop a `!build` and let's go.",
+            "AFK Andy is online. MC server manager ready. `!start` to fire it up.",
+            "I'm back! Server need starting? `!start`",
+            "Andy's in the building. Want me to boot the server? `!start`",
+            "Online and ready. The pickaxe is sharp.",
         ])
         await channel.send("**" + startup + "**")
 
